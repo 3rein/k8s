@@ -19,6 +19,9 @@ spec:
         control-plane: controller-manager
         app.kubernetes.io/name: {{ include "hydra-maester.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.deployment.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -41,7 +44,13 @@ spec:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-      serviceAccountName: {{ include "hydra-maester.name" . }}-account
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "hydra-maester.fullname" . }}-account
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
       nodeSelector:
       {{- with .Values.deployment.nodeSelector }}
         {{- toYaml . | nindent 8 }}

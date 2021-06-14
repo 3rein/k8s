@@ -25,6 +25,17 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Create a secret name which can be overridden.
+*/}}
+{{- define "kratos.secretname" -}}
+{{- if .Values.secret.nameOverride -}}
+{{- .Values.secret.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ include "kratos.fullname" . }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "kratos.chart" -}}
@@ -39,11 +50,20 @@ Generate the dsn value
 {{- end -}}
 
 {{/*
-Generate the secrets.session value
+Generate the secrets.default value
 */}}
-{{- define "kratos.secrets.session" -}}
-{{- if .Values.kratos.config.secrets.session -}}
-{{- .Values.kratos.config.secrets.session }}
+{{- define "kratos.secrets.default" -}}
+{{- if .Values.kratos.config.secrets.default -}}
+{{- .Values.kratos.config.secrets.default }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Generate the secrets.cookie value
+*/}}
+{{- define "kratos.secrets.cookie" -}}
+{{- if .Values.kratos.config.secrets.cookie -}}
+{{- .Values.kratos.config.secrets.cookie }}
 {{- end -}}
 {{- end -}}
 
@@ -53,6 +73,9 @@ Generate the configmap data, redacting secrets
 {{- define "kratos.configmap" -}}
 {{- $config := unset .Values.kratos.config "dsn" -}}
 {{- $config := unset $config "secrets" -}}
+{{- if .Values.kratos.config.courier.smtp.connection_uri -}}
+{{- $config = set $config "courier" (set $config.courier "smtp" (unset $config.courier.smtp "connection_uri")) -}}
+{{- end -}}
 {{- toYaml $config -}}
 {{- end -}}
 

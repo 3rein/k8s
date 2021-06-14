@@ -10,9 +10,13 @@ enabledNamespaces: []
 
 image:
   repository: oryd/hydra-maester
-  tag: v0.0.16
+  tag: v0.0.19
   # Image pull policy
   pullPolicy: IfNotPresent
+
+## Pod priority
+## https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+# priorityClassName: ""
 
 adminService:
   name:
@@ -33,6 +37,16 @@ deployment:
     #   cpu: 100m
     #   memory: 20Mi
 
+  securityContext:
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    privileged: false
+
   # Node labels for pod assignment.
   nodeSelector: {}
   # If you do want to specify node labels, uncomment the following
@@ -42,6 +56,13 @@ deployment:
   # Configure node tolerations.
   tolerations: []
   annotations: {}
+  podLabels: {}
+
+  # https://github.com/kubernetes/kubernetes/issues/57601
+  automountServiceAccountToken: false
+
+job:
+  podLabels: {}
 
 # Configure node affinity
 affinity: {}

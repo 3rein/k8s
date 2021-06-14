@@ -59,7 +59,10 @@ spec:
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      serviceAccountName: {{ include "oathkeeper-maester.name" . }}-account
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+      serviceAccountName: {{ include "oathkeeper-maester.fullname" . }}-account
+      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       securityContext: {}
